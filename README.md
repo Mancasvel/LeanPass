@@ -1,137 +1,302 @@
-# 📚 LeanPass - Generador de Guías de Estudio con IA
+# LeanPass - Generador de Guías de Estudio con IA y MongoDB
 
-LeanPass es una aplicación web que utiliza inteligencia artificial para analizar exámenes antiguos y generar guías de estudio personalizadas, ayudándote a optimizar tu preparación académica.
+LeanPass es una aplicación web completa que utiliza inteligencia artificial para analizar exámenes antiguos y generar guías de estudio personalizadas. Con un sistema completo de usuarios, gestión de asignaturas y almacenamiento persistente en MongoDB.
 
-## 🚀 Características
+## 🚀 Características Principales
 
-- **Subida de archivos**: Soporta archivos PDF y TXT (hasta 10MB)
-- **Análisis con IA avanzada**: Utiliza Nvidia Llama 3.1 Nemotron Ultra con 1M tokens de contexto
-- **Procesamiento masivo**: Maneja documentos completos sin fragmentación
-- **Guías detalladas**: Genera metodologías de estudio paso a paso para cada tema
-- **Preguntas de ejemplo**: Incluye preguntas con soluciones detalladas y variaciones
-- **Recursos multimedia**: Videos de YouTube integrados y enlaces educativos
-- **Análisis de errores**: Identifica errores comunes y casos atípicos
-- **Interfaz interactiva**: Pestañas organizadas con contenido expandible
-- **Drag & Drop**: Interfaz intuitiva para subir archivos
+### 🔐 Sistema de Usuarios
+- **Autenticación completa**: Registro y login con JWT
+- **Gestión de sesiones**: Tokens seguros con expiración
+- **Perfiles de usuario**: Información personal y preferencias
 
-## 🛠️ Tecnologías
+### 📚 Gestión de Contenido
+- **Asignaturas**: Organiza tus exámenes por materias
+- **Subida de exámenes**: Soporte para PDF y TXT (hasta 10MB)
+- **Análisis inteligente**: IA procesa y genera guías automáticamente
+- **Historial completo**: Acceso a todos tus análisis anteriores
 
-- **Frontend**: Next.js 14, React, TailwindCSS
-- **Backend**: Next.js API Routes
-- **Estado**: Zustand
-- **IA**: OpenRouter API (Nvidia Llama 3.1 Nemotron Ultra - Gratuito)
-- **Procesamiento**: pdf-parse para extracción de texto
+### 🤖 IA Avanzada
+- **Análisis profundo**: Identifica temas, frecuencia y dificultad
+- **Guías detalladas**: Metodología paso a paso para cada tema
+- **Preguntas ejemplo**: Con soluciones detalladas y variaciones
+- **Recursos multimedia**: Enlaces a YouTube y sitios web educativos
+- **Videos embebidos**: Visualización directa de contenido de YouTube
 
-## 📋 Requisitos previos
+### 💾 Base de Datos MongoDB
+- **Almacenamiento persistente**: Todos tus datos seguros en la nube
+- **Relaciones optimizadas**: Estructura eficiente entre usuarios, asignaturas y exámenes
+- **Búsquedas rápidas**: Índices optimizados para mejor rendimiento
 
-- Node.js 18+ 
-- npm o yarn
-- Clave API de OpenRouter
+## 🛠️ Stack Tecnológico
 
-## 🔧 Instalación
+### Frontend
+- **Next.js 15**: Framework React con App Router
+- **React 19**: Última versión con mejoras de rendimiento
+- **TailwindCSS 4**: Diseño moderno y responsivo
+- **TypeScript**: Type safety completo
+- **Zustand**: Gestión de estado global
 
-1. Clona el repositorio:
+### Backend
+- **MongoDB**: Base de datos NoSQL con Mongoose ODM
+- **JWT**: Autenticación segura con tokens
+- **bcryptjs**: Hashing seguro de contraseñas
+- **Multer**: Manejo de archivos multipart
+
+### IA y Procesamiento
+- **OpenRouter API**: Acceso a modelos de IA avanzados
+- **Nvidia Llama 3.1 Nemotron Ultra**: Modelo principal para análisis
+- **pdf-parse**: Extracción de texto de PDFs
+
+## 📦 Instalación Rápida
+
+1. **Clona el repositorio**:
 ```bash
-git clone <tu-repositorio>
-cd leanpass
+git clone <repository-url>
+cd leanpass-app
 ```
 
-2. Instala las dependencias:
+2. **Instala dependencias**:
 ```bash
 npm install
 ```
 
-3. Configura las variables de entorno:
-
-Crea un archivo `.env.local` en la raíz del proyecto:
+3. **Configuración automática**:
 ```bash
-# .env.local
-OPENROUTER_API_KEY=tu_clave_api_aqui
+npm run setup
 ```
 
-**Importante**: Reemplaza `tu_clave_api_aqui` con tu clave real de OpenRouter.
+4. **Configura variables de entorno**:
+Edita `.env.local` con tus credenciales:
+```env
+MONGODB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/leanpass
+OPENROUTER_API_KEY=tu_api_key_de_openrouter
+JWT_SECRET=tu_clave_secreta_jwt
+```
 
-4. Ejecuta el servidor de desarrollo:
+5. **Ejecuta la aplicación**:
 ```bash
 npm run dev
 ```
 
-5. Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
+## 🗄️ Configuración de MongoDB
 
-## 🎯 Cómo usar
+### MongoDB Atlas (Recomendado)
+1. Crea una cuenta en [MongoDB Atlas](https://cloud.mongodb.com)
+2. Crea un cluster gratuito (M0)
+3. Configura un usuario de base de datos
+4. Obtén tu connection string
+5. Actualiza `MONGODB_URI` en `.env.local`
 
-1. **Sube tu examen**: Arrastra un archivo PDF o TXT o haz clic para seleccionarlo
-2. **Espera el análisis**: La IA procesará el contenido automáticamente
-3. **Explora tu guía**: Navega por las pestañas de cada tema:
-   - **📋 Resumen**: Vista general y estadísticas del tema
-   - **📖 Guía**: Metodología de estudio, conceptos clave y errores comunes
-   - **❓ Preguntas**: Ejemplos con soluciones paso a paso y variaciones
-   - **🎯 Recursos**: Videos de YouTube integrados y enlaces educativos
+### Esquema de Base de Datos
+```javascript
+// Usuarios
+{
+  _id: ObjectId,
+  email: String,
+  passwordHash: String,
+  name: String,
+  createdAt: Date,
+  updatedAt: Date
+}
 
-## 📁 Estructura del proyecto
+// Asignaturas
+{
+  _id: ObjectId,
+  userId: ObjectId,
+  name: String,
+  description: String,
+  createdAt: Date,
+  updatedAt: Date
+}
 
+// Exámenes
+{
+  _id: ObjectId,
+  userId: ObjectId,
+  subjectId: ObjectId,
+  title: String,
+  originalFileName: String,
+  fileContent: String, // Base64
+  fileType: String,
+  analysisStatus: String, // pending, processing, completed, error
+  createdAt: Date,
+  updatedAt: Date
+}
+
+// Guías de Estudio
+{
+  _id: ObjectId,
+  userId: ObjectId,
+  examId: ObjectId,
+  subjectId: ObjectId,
+  topics: [TopicSchema], // Estructura compleja con preguntas y recursos
+  totalTopics: Number,
+  processingTime: String,
+  createdAt: Date,
+  updatedAt: Date
+}
 ```
-src/
-├── app/
-│   ├── api/analyze/          # API route para procesar archivos
-│   ├── layout.tsx            # Layout principal
-│   └── page.tsx              # Página principal
-├── components/
-│   ├── FileUpload.tsx        # Componente de subida de archivos
-│   ├── StudyGuideResults.tsx # Componente de resultados
-│   └── ErrorMessage.tsx      # Componente de errores
-├── store/
-│   └── useAppStore.ts        # Store de Zustand
-└── types/
-    └── index.ts              # Tipos TypeScript
+
+## 🔑 Configuración de APIs
+
+### OpenRouter API
+1. Regístrate en [OpenRouter](https://openrouter.ai)
+2. Obtén tu API key
+3. Agrega créditos a tu cuenta
+4. Actualiza `OPENROUTER_API_KEY` en `.env.local`
+
+### Modelos Disponibles
+- **Nvidia Llama 3.1 Nemotron Ultra**: Modelo principal (recomendado)
+- **Google Gemini 2.5 Pro**: Alternativa de alta calidad
+- **Anthropic Claude**: Para análisis complejos
+
+## 📱 Funcionalidades del Dashboard
+
+### 📊 Panel Principal
+- **Resumen de actividad**: Estadísticas de uso
+- **Acceso rápido**: A asignaturas y exámenes recientes
+- **Estado de análisis**: Progreso de procesamiento en tiempo real
+
+### 📚 Gestión de Asignaturas
+- **Crear asignaturas**: Organiza por materias
+- **Editar información**: Nombres y descripciones
+- **Eliminar con cascada**: Borra exámenes y guías asociadas
+
+### 📄 Gestión de Exámenes
+- **Subida por drag & drop**: Interfaz intuitiva
+- **Validación automática**: Tipos y tamaños de archivo
+- **Estados de procesamiento**: Seguimiento visual del progreso
+- **Análisis bajo demanda**: Procesa cuando necesites
+
+### 📖 Guías de Estudio
+- **Visualización completa**: Todos los temas y detalles
+- **Navegación por pestañas**: Resumen, guía, preguntas, recursos
+- **Videos embebidos**: YouTube integrado
+- **Exportación**: Guarda tus guías (próximamente)
+
+## 🎯 Estructura de Guías Generadas
+
+### Por cada tema identificado:
+- **📊 Análisis cuantitativo**: Frecuencia y dificultad
+- **📝 Metodología**: Pasos detallados de resolución
+- **❓ Preguntas ejemplo**: Con soluciones paso a paso
+- **🔄 Variaciones**: Casos atípicos y alternativas
+- **🌐 Recursos externos**: Enlaces web y videos de YouTube
+- **📺 Videos embebidos**: Visualización directa
+
+### Orden de estudio optimizado:
+1. **Temas fundamentales**: Base teórica
+2. **Temas frecuentes**: Mayor probabilidad de aparición
+3. **Temas complejos**: Requieren más tiempo
+4. **Repaso final**: Consolidación
+
+## 🔧 API Endpoints
+
+### Autenticación
+- `POST /api/auth/register` - Registro de usuarios
+- `POST /api/auth/login` - Inicio de sesión
+
+### Asignaturas
+- `GET /api/subjects` - Listar asignaturas del usuario
+- `POST /api/subjects` - Crear nueva asignatura
+- `PUT /api/subjects/[id]` - Actualizar asignatura
+- `DELETE /api/subjects/[id]` - Eliminar asignatura
+
+### Exámenes
+- `GET /api/exams` - Listar exámenes del usuario
+- `POST /api/exams` - Subir nuevo examen
+- `GET /api/exams/[id]` - Obtener examen específico
+- `PUT /api/exams/[id]` - Actualizar examen
+- `DELETE /api/exams/[id]` - Eliminar examen
+
+### Análisis y Guías
+- `POST /api/analyze` - Analizar examen con IA
+- `GET /api/study-guides` - Listar guías del usuario
+- `GET /api/study-guides/[id]` - Obtener guía específica
+- `DELETE /api/study-guides/[id]` - Eliminar guía
+
+## 🚀 Despliegue en Producción
+
+### Vercel + MongoDB Atlas
+1. **Conecta tu repositorio** a Vercel
+2. **Configura variables de entorno** en Vercel Dashboard
+3. **Despliega automáticamente** con cada push
+
+### Variables de entorno para producción:
+```env
+MONGODB_URI=mongodb+srv://...
+OPENROUTER_API_KEY=sk-or-...
+JWT_SECRET=clave-super-secreta-produccion
+NEXTAUTH_URL=https://tu-dominio.vercel.app
+NEXTAUTH_SECRET=otra-clave-secreta
 ```
 
-## 🧠 Modelo Nvidia Llama 3.1 Nemotron Ultra (Gratuito)
+### Consideraciones de producción:
+- **Almacenamiento de archivos**: Migrar a S3/Supabase Storage
+- **CDN**: Para archivos estáticos
+- **Monitoring**: Logs y métricas de rendimiento
+- **Backup**: Estrategia de respaldo de MongoDB
 
-LeanPass utiliza el modelo **Nvidia Llama 3.1 Nemotron Ultra** de Nvidia, que ofrece:
+## 🔒 Seguridad
 
-- **Completamente gratuito**: $0 por tokens de entrada y salida
-- **Contexto masivo**: 1,000,000 tokens de entrada (≈750,000 palabras)
-- **Modelo gigante**: 253B parámetros para máxima precisión
-- **Seguimiento de instrucciones**: Excelente capacidad para seguir formatos específicos
-- **Análisis académico**: Optimizado para tareas de comprensión y análisis
+### Implementado:
+- **Hashing de contraseñas**: bcryptjs con salt
+- **JWT tokens**: Expiración automática (7 días)
+- **Validación de entrada**: Sanitización de datos
+- **Autorización**: Middleware de autenticación
+- **CORS**: Configuración segura
 
-### Ventajas del procesamiento:
+### Recomendaciones adicionales:
+- **Rate limiting**: Para prevenir ataques
+- **HTTPS**: Certificados SSL en producción
+- **Validación de archivos**: Escáner de malware
+- **Logs de auditoría**: Seguimiento de acciones
 
-1. **Completamente gratuito**: Sin costos por uso del modelo
-2. **Documentos masivos**: Maneja archivos de hasta 1M tokens
-3. **Análisis exhaustivo**: Identifica todos los temas y conceptos
-4. **Respuesta estructurada**: Genera entre 8-15 temas priorizados
-5. **Precisión superior**: 253B parámetros para análisis detallado
+## 📊 Rendimiento
 
-## 🔑 Configuración de OpenRouter
+### Optimizaciones implementadas:
+- **Índices MongoDB**: Consultas rápidas
+- **Lazy loading**: Componentes bajo demanda
+- **Caching**: Conexiones de base de datos
+- **Compresión**: Archivos estáticos
 
-1. Regístrate en [OpenRouter](https://openrouter.ai/)
-2. Obtén tu clave API
-3. Añádela al archivo `.env.local`
+### Métricas objetivo:
+- **Tiempo de carga**: < 2 segundos
+- **Análisis de IA**: < 30 segundos
+- **Subida de archivos**: < 10 segundos (10MB)
 
-## 🚀 Despliegue
+## 🤝 Contribución
 
-Para desplegar en Vercel:
+### Proceso de desarrollo:
+1. **Fork** el repositorio
+2. **Crea una rama** para tu feature
+3. **Implementa** con tests
+4. **Documenta** los cambios
+5. **Abre un Pull Request**
 
-1. Conecta tu repositorio a Vercel
-2. Añade la variable de entorno `OPENROUTER_API_KEY`
-3. Despliega
-
-## 🤝 Contribuir
-
-Las contribuciones son bienvenidas. Por favor:
-
-1. Fork el proyecto
-2. Crea una rama para tu feature
-3. Commit tus cambios
-4. Push a la rama
-5. Abre un Pull Request
+### Áreas de contribución:
+- **Nuevos modelos de IA**: Integración con otros proveedores
+- **Exportación**: PDF, Word, Markdown
+- **Colaboración**: Compartir guías entre usuarios
+- **Móvil**: App nativa React Native
+- **Análisis avanzado**: Gráficos y estadísticas
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT.
+MIT License - Ver [LICENSE](LICENSE) para detalles completos.
 
-## 🆘 Soporte
+## 🆘 Soporte y Comunidad
 
-Si tienes problemas o preguntas, por favor abre un issue en el repositorio.
+### Documentación:
+- **Wiki**: Guías detalladas
+- **API Docs**: Especificación completa
+- **Ejemplos**: Casos de uso comunes
+
+### Soporte:
+- **Issues**: Reporta bugs y solicita features
+- **Discussions**: Preguntas y ayuda comunitaria
+- **Discord**: Chat en tiempo real (próximamente)
+
+---
+
+**LeanPass** - Transformando la manera en que los estudiantes se preparan para sus exámenes con el poder de la inteligencia artificial y la organización inteligente. 🎓✨

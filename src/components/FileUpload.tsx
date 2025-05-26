@@ -28,27 +28,69 @@ export default function FileUpload() {
 
     setError(null);
     setUploading(true);
-    setAnalyzing(true);
 
     try {
+      // Paso 1: Crear una asignatura temporal para el archivo
+      const subjectResponse = await fetch('/api/subjects', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: `Análisis Rápido ${Date.now()}`,
+          description: 'Asignatura temporal para análisis directo de archivos'
+        })
+      });
+
+      const subjectData = await subjectResponse.json();
+      if (!subjectData.success) {
+        throw new Error(subjectData.error || 'Error creando asignatura temporal');
+      }
+
+      const subjectId = subjectData.data._id;
+
+      // Paso 2: Subir el archivo como examen
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('subjectId', subjectId);
+      formData.append('title', file.name.replace(/\.[^/.]+$/, "")); // Nombre sin extensión
 
-      const response = await fetch('/api/analyze', {
+      const uploadResponse = await fetch('/api/exams', {
         method: 'POST',
+        credentials: 'include',
         body: formData,
       });
 
-      const result: FileUploadResponse = await response.json();
+      const uploadResult = await uploadResponse.json();
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error || 'Error subiendo archivo');
+      }
 
-      if (result.success && result.data) {
-        setResult(result.data);
+      const examId = uploadResult.data._id;
+      setUploading(false);
+      setAnalyzing(true);
+
+      // Paso 3: Analizar el examen
+      const analyzeResponse = await fetch('/api/analyze', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ examId })
+      });
+
+      const analyzeResult: FileUploadResponse = await analyzeResponse.json();
+
+      if (analyzeResult.success && analyzeResult.data) {
+        setResult(analyzeResult.data);
       } else {
-        setError(result.error || 'Error al procesar el archivo');
+        setError(analyzeResult.error || 'Error al procesar el archivo');
       }
     } catch (error) {
       console.error('Error uploading file:', error);
-      setError('Error al subir el archivo. Inténtalo de nuevo.');
+      setError(error instanceof Error ? error.message : 'Error al subir el archivo. Inténtalo de nuevo.');
     } finally {
       setUploading(false);
       setAnalyzing(false);

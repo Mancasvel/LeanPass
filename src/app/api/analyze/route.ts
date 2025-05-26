@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { StudyTopic } from '@/types';
+import connectDB from '@/lib/mongodb';
+import Exam from '@/models/Exam';
+import StudyGuide from '@/models/StudyGuide';
+import { withAuth } from '@/middleware/auth';
+import mongoose from 'mongoose';
 
 // Importación dinámica de pdf-parse para evitar problemas de SSR
 const getPdfParse = async () => {
@@ -7,37 +12,116 @@ const getPdfParse = async () => {
   return pdfParse.default;
 };
 
-export async function POST(request: NextRequest) {
+// POST /api/analyze - Analizar archivo o examen existente
+export const POST = withAuth(async (request: NextRequest, user: any) => {
+  let requestBody: any = null;
+  let examId: string | null = null;
+  let isFileUpload = false;
+  
   try {
-    const formData = await request.formData();
-    const file = formData.get('file') as File;
+    await connectDB();
     
-    if (!file) {
+    // Detectar si es FormData (file upload) o JSON (exam analysis)
+    const contentType = request.headers.get('content-type') || '';
+    
+    if (contentType.includes('multipart/form-data')) {
+      // Es un file upload directo - redirigir al endpoint correcto
+      isFileUpload = true;
       return NextResponse.json(
-        { success: false, error: 'No se encontró ningún archivo' },
+        { success: false, error: 'Para subir archivos usa /api/exams' },
+        { status: 400 }
+      );
+    } else {
+      // Es JSON con examId
+      const bodyText = await request.text();
+      console.log('Raw request body:', bodyText);
+      
+      try {
+        requestBody = JSON.parse(bodyText);
+      } catch (parseError) {
+        console.error('Error parsing request body:', parseError);
+        return NextResponse.json(
+          { success: false, error: 'Invalid JSON in request body' },
+          { status: 400 }
+        );
+      }
+      
+      examId = requestBody.examId;
+    }
+    
+    if (!examId) {
+      return NextResponse.json(
+        { success: false, error: 'Exam ID is required' },
         { status: 400 }
       );
     }
 
-    // Verificar tipo de archivo
-    const allowedTypes = ['application/pdf', 'text/plain'];
-    if (!allowedTypes.includes(file.type)) {
+    if (!mongoose.Types.ObjectId.isValid(examId)) {
       return NextResponse.json(
-        { success: false, error: 'Tipo de archivo no soportado. Solo PDF y TXT.' },
+        { success: false, error: 'Invalid exam ID' },
         { status: 400 }
       );
     }
+
+    // Buscar el examen y verificar que pertenece al usuario
+    const exam = await Exam.findOne({
+      _id: examId,
+      userId: user._id
+    }).populate('subjectId', 'name');
+
+    if (!exam) {
+      return NextResponse.json(
+        { success: false, error: 'Exam not found' },
+        { status: 404 }
+      );
+    }
+
+    // Verificar si ya existe una guía de estudio para este examen
+    const existingGuide = await StudyGuide.findOne({ examId });
+    if (existingGuide) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          topics: existingGuide.topics.map((topic: any) => ({
+            tema: topic.topicName,
+            frecuencia: topic.frecuencia,
+            dificultad: topic.dificultad,
+            tipo_preguntas: topic.tipoPreguntas,
+            orden_estudio: topic.ordenEstudio,
+            guia_resolucion: topic.guiaResolucion,
+            preguntas_ejemplo: topic.sampleQuestions.map((q: any) => ({
+              pregunta: q.question,
+              tipo: q.tipo,
+              dificultad: q.dificultad,
+              solucion_paso_a_paso: q.stepByStepSolution,
+              variaciones: q.variations,
+              casos_atipicos: q.atypicalCases
+            })),
+            recursos: topic.resources
+          })),
+          totalTopics: existingGuide.totalTopics,
+          processingTime: existingGuide.processingTime
+        }
+      });
+    }
+
+    // Marcar el examen como en procesamiento
+    await Exam.findByIdAndUpdate(examId, { analysisStatus: 'processing' });
 
     let extractedText = '';
 
-    // Extraer texto según el tipo de archivo
-    if (file.type === 'application/pdf') {
-      const buffer = await file.arrayBuffer();
+    // Extraer texto del archivo almacenado
+    if (exam.fileType === 'pdf') {
+      // Decodificar el archivo base64 y extraer texto
+      const base64Data = exam.fileUrl.split(',')[1];
+      const buffer = Buffer.from(base64Data, 'base64');
       const pdfParse = await getPdfParse();
-      const data = await pdfParse(Buffer.from(buffer));
+      const data = await pdfParse(buffer);
       extractedText = data.text;
-    } else if (file.type === 'text/plain') {
-      extractedText = await file.text();
+    } else if (exam.fileType === 'txt') {
+      // Decodificar el archivo base64 de texto
+      const base64Data = exam.fileUrl.split(',')[1];
+      extractedText = Buffer.from(base64Data, 'base64').toString('utf-8');
     }
 
     if (!extractedText.trim()) {
@@ -280,6 +364,50 @@ Return ONLY a valid JSON array with this exact structure, no explanations, no ma
       .filter(topic => topic.tema && typeof topic.frecuencia === 'number')
       .sort((a, b) => a.orden_estudio - b.orden_estudio);
 
+    // Guardar la guía de estudio en la base de datos
+    const studyGuide = new StudyGuide({
+      examId,
+      subjectId: exam.subjectId,
+      userId: user._id,
+      topics: validTopics.map(topic => ({
+        topicName: topic.tema,
+        frecuencia: topic.frecuencia,
+        dificultad: topic.dificultad,
+        tipoPreguntas: topic.tipo_preguntas,
+        ordenEstudio: topic.orden_estudio,
+        guiaResolucion: {
+          descripcionGeneral: topic.guia_resolucion?.descripcion_general || `Guía de estudio para ${topic.tema}`,
+          metodologiaEstudio: topic.guia_resolucion?.metodologia_estudio || [],
+          conceptosClave: topic.guia_resolucion?.conceptos_clave || [],
+          erroresComunes: topic.guia_resolucion?.errores_comunes || []
+        },
+        sampleQuestions: (topic.preguntas_ejemplo || []).map(q => ({
+          question: q.pregunta,
+          tipo: q.tipo,
+          dificultad: q.dificultad,
+          stepByStepSolution: q.solucion_paso_a_paso || [],
+          variations: q.variaciones || [],
+          atypicalCases: q.casos_atipicos || []
+        })),
+        resources: (topic.recursos || []).map(resource => ({
+          type: resource.tipo || 'web',
+          title: resource.titulo || 'Recurso sin título',
+          url: resource.url || '#',
+          description: resource.descripcion || 'Descripción no disponible',
+          youtubeId: resource.youtube_id || null
+        }))
+      })),
+      overallSummary: `Análisis completo de ${validTopics.length} temas del examen "${exam.title}" de la asignatura ${exam.subjectId.name}`,
+      totalTopics: validTopics.length,
+      processingTime: Date.now(),
+      aiModel: 'nvidia/llama-3.1-nemotron-ultra-253b-v1:free'
+    });
+
+    await studyGuide.save();
+
+    // Marcar el examen como completado
+    await Exam.findByIdAndUpdate(examId, { analysisStatus: 'completed' });
+
     const result = {
       topics: validTopics,
       totalTopics: validTopics.length,
@@ -293,11 +421,24 @@ Return ONLY a valid JSON array with this exact structure, no explanations, no ma
 
   } catch (error) {
     console.error('Error in analyze API:', error);
+    
+    // Marcar el examen como error si algo falla
+    if (requestBody && requestBody.examId) {
+      try {
+        await Exam.findByIdAndUpdate(requestBody.examId, { 
+          analysisStatus: 'error',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error'
+        });
+      } catch (e) {
+        console.error('Error updating exam status:', e);
+      }
+    }
+    
     return NextResponse.json(
       { success: false, error: 'Error interno del servidor' },
       { status: 500 }
     );
   }
-}
+});
 
  
