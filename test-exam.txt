@@ -1,0 +1,36 @@
+EXAMEN DE MATEMÁTICAS - ÁLGEBRA LINEAL
+
+1. Sistemas de ecuaciones lineales
+Resuelva el siguiente sistema de ecuaciones:
+2x + 3y = 7
+4x - y = 1
+
+2. Matrices y determinantes
+Calcule el determinante de la matriz:
+|2  1  3|
+|0  4  1|
+|1  2  0|
+
+3. Espacios vectoriales
+Determine si los vectores v1=(1,2,0), v2=(0,1,1), v3=(1,3,1) son linealmente independientes.
+
+4. Transformaciones lineales
+Sea T: R² → R² definida por T(x,y) = (2x+y, x-y)
+a) Encuentre la matriz asociada a T
+b) Determine si T es invertible
+
+5. Valores y vectores propios
+Para la matriz A = |3  1|
+                   |0  2|
+Encuentre los valores propios y vectores propios.
+
+6. Diagonalización
+Determine si la matriz del ejercicio anterior es diagonalizable.
+
+TEMAS PRINCIPALES:
+- Sistemas de ecuaciones lineales (aparece en 3 preguntas)
+- Matrices y determinantes (aparece en 4 preguntas)
+- Espacios vectoriales (aparece en 2 preguntas)
+- Transformaciones lineales (aparece en 2 preguntas)
+- Valores propios (aparece en 2 preguntas)
+- Diagonalización (aparece en 1 pregunta) 

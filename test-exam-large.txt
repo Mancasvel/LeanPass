@@ -1,0 +1,206 @@
+EXAMEN FINAL - INGENIERÍA DE SOFTWARE
+UNIVERSIDAD TECNOLÓGICA - SEMESTRE 2024-1
+DURACIÓN: 3 HORAS - VALOR: 100 PUNTOS
+
+INSTRUCCIONES GENERALES:
+- Lea cuidadosamente cada pregunta antes de responder
+- Justifique todas sus respuestas con ejemplos cuando sea posible
+- Use diagramas UML cuando sea apropiado
+- La claridad y organización de las respuestas será evaluada
+
+==================================================
+SECCIÓN I: METODOLOGÍAS DE DESARROLLO (25 PUNTOS)
+==================================================
+
+1. (8 puntos) Metodologías Ágiles
+   a) Compare Scrum y Kanban en términos de:
+      - Estructura de roles
+      - Gestión del flujo de trabajo
+      - Métricas de rendimiento
+      - Casos de uso recomendados
+   
+   b) Explique el concepto de "Definition of Done" en Scrum y proporcione un ejemplo específico para un proyecto de desarrollo web.
+
+2. (7 puntos) Extreme Programming (XP)
+   Describa las siguientes prácticas de XP y explique cómo contribuyen a la calidad del software:
+   - Test-Driven Development (TDD)
+   - Pair Programming
+   - Continuous Integration
+   - Refactoring
+
+3. (10 puntos) Análisis Comparativo
+   Una startup tecnológica debe elegir entre metodología en cascada y metodología ágil para desarrollar una aplicación móvil innovadora. Analice:
+   a) Ventajas y desventajas de cada metodología para este contexto
+   b) Factores que influirían en la decisión
+   c) Su recomendación justificada
+
+==================================================
+SECCIÓN II: DISEÑO DE SOFTWARE (25 PUNTOS)
+==================================================
+
+4. (10 puntos) Patrones de Diseño
+   a) Implemente el patrón Singleton en Java, considerando:
+      - Thread safety
+      - Lazy initialization
+      - Prevención de reflexión
+   
+   b) Explique cuándo usar el patrón Observer y proporcione un ejemplo de implementación en el contexto de una aplicación de comercio electrónico.
+
+5. (8 puntos) Arquitectura de Software
+   Diseñe la arquitectura de un sistema de gestión de biblioteca universitaria que debe:
+   - Manejar múltiples tipos de usuarios (estudiantes, profesores, bibliotecarios)
+   - Gestionar préstamos, reservas y multas
+   - Integrarse con sistemas externos (base de datos académica, sistema de pagos)
+   - Ser escalable y mantenible
+   
+   Incluya:
+   - Diagrama de arquitectura de alto nivel
+   - Justificación de decisiones arquitectónicas
+   - Consideraciones de seguridad
+
+6. (7 puntos) SOLID Principles
+   Para cada principio SOLID, proporcione:
+   - Definición clara
+   - Ejemplo de violación del principio
+   - Refactorización que respete el principio
+
+==================================================
+SECCIÓN III: TESTING Y CALIDAD (20 PUNTOS)
+==================================================
+
+7. (8 puntos) Estrategias de Testing
+   a) Explique la pirámide de testing y la importancia de cada nivel
+   b) Diseñe un plan de testing para una API REST que maneja transacciones financieras, incluyendo:
+      - Tipos de pruebas necesarias
+      - Herramientas recomendadas
+      - Criterios de aceptación
+
+8. (6 puntos) Test-Driven Development
+   Implemente TDD para una función que valide números de tarjeta de crédito usando el algoritmo de Luhn:
+   - Escriba al menos 3 casos de prueba
+   - Implemente la función mínima que pase las pruebas
+   - Refactorice el código
+
+9. (6 puntos) Métricas de Calidad
+   Explique las siguientes métricas y cómo se calculan:
+   - Complejidad ciclomática
+   - Cobertura de código
+   - Deuda técnica
+   - Mantenibilidad
+
+==================================================
+SECCIÓN IV: GESTIÓN DE PROYECTOS (15 PUNTOS)
+==================================================
+
+10. (8 puntos) Estimación y Planificación
+    Un equipo de 5 desarrolladores debe crear un sistema de gestión de inventario. El product owner ha definido 50 user stories. Usando Planning Poker:
+    a) Explique el proceso de estimación
+    b) Calcule la velocidad del equipo si en el primer sprint completaron stories por 23 story points
+    c) Estime cuántos sprints necesitarán para completar el proyecto
+
+11. (7 puntos) Gestión de Riesgos
+    Identifique y analice 5 riesgos principales en un proyecto de desarrollo de software distribuido (equipo remoto). Para cada riesgo:
+    - Probabilidad de ocurrencia
+    - Impacto potencial
+    - Estrategia de mitigación
+
+==================================================
+SECCIÓN V: TECNOLOGÍAS EMERGENTES (15 PUNTOS)
+==================================================
+
+12. (8 puntos) DevOps y CI/CD
+    Diseñe un pipeline de CI/CD para una aplicación web que incluya:
+    - Etapas del pipeline
+    - Herramientas recomendadas
+    - Estrategias de deployment (blue-green, canary, rolling)
+    - Monitoreo y rollback
+
+13. (7 puntos) Microservicios
+    Compare arquitectura monolítica vs microservicios:
+    a) Ventajas y desventajas de cada enfoque
+    b) Cuándo elegir cada uno
+    c) Desafíos específicos de los microservicios y sus soluciones
+
+==================================================
+CASOS PRÁCTICOS ADICIONALES
+==================================================
+
+CASO 1: Sistema de E-learning
+Una universidad quiere desarrollar una plataforma de e-learning que permita:
+- Gestión de cursos y contenido multimedia
+- Evaluaciones en línea con diferentes tipos de preguntas
+- Foros de discusión y mensajería
+- Seguimiento del progreso del estudiante
+- Integración con sistemas existentes (SIS, LMS legacy)
+
+Requisitos no funcionales:
+- Soporte para 10,000 usuarios concurrentes
+- Disponibilidad 99.9%
+- Tiempo de respuesta < 2 segundos
+- Cumplimiento GDPR para datos de estudiantes
+
+CASO 2: Aplicación de Delivery
+Startup que desarrolla una app de delivery de comida debe considerar:
+- Aplicaciones móviles para clientes y repartidores
+- Panel web para restaurantes
+- Sistema de pagos integrado
+- Tracking en tiempo real
+- Sistema de calificaciones y reseñas
+- Algoritmos de optimización de rutas
+
+Desafíos técnicos:
+- Escalabilidad geográfica
+- Manejo de picos de demanda
+- Sincronización en tiempo real
+- Procesamiento de pagos seguro
+
+TEMAS TRANSVERSALES:
+
+1. SEGURIDAD EN SOFTWARE
+- Vulnerabilidades OWASP Top 10
+- Autenticación y autorización
+- Cifrado de datos
+- Secure coding practices
+- Auditorías de seguridad
+
+2. PERFORMANCE Y ESCALABILIDAD
+- Optimización de bases de datos
+- Caching strategies
+- Load balancing
+- Horizontal vs vertical scaling
+- Profiling y monitoring
+
+3. MANTENIMIENTO Y EVOLUCIÓN
+- Legacy code management
+- Refactoring strategies
+- Documentation practices
+- Knowledge transfer
+- Technical debt management
+
+4. ASPECTOS LEGALES Y ÉTICOS
+- Licencias de software
+- Propiedad intelectual
+- Privacidad de datos
+- Accesibilidad (WCAG)
+- Sostenibilidad del software
+
+CRITERIOS DE EVALUACIÓN:
+- Comprensión conceptual (40%)
+- Aplicación práctica (30%)
+- Análisis crítico (20%)
+- Claridad y organización (10%)
+
+RECURSOS PERMITIDOS:
+- Documentación oficial de tecnologías
+- Diagramas UML de referencia
+- Calculadora
+
+TIEMPO RECOMENDADO POR SECCIÓN:
+- Sección I: 45 minutos
+- Sección II: 45 minutos
+- Sección III: 40 minutos
+- Sección IV: 30 minutos
+- Sección V: 30 minutos
+- Revisión: 10 minutos
+
+¡BUENA SUERTE! 
