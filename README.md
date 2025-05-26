@@ -5,11 +5,13 @@ LeanPass es una aplicación web que utiliza inteligencia artificial para analiza
 ## 🚀 Características
 
 - **Subida de archivos**: Soporta archivos PDF y TXT (hasta 10MB)
-- **Análisis con IA avanzada**: Utiliza Gemini 2.5 Pro con 1M tokens de contexto
+- **Análisis con IA avanzada**: Utiliza Nvidia Llama 3.1 Nemotron Ultra con 1M tokens de contexto
 - **Procesamiento masivo**: Maneja documentos completos sin fragmentación
-- **Guías personalizadas**: Genera temas ordenados por frecuencia y dificultad
-- **Análisis exhaustivo**: Identifica todos los temas y conceptos del documento
-- **Interfaz moderna**: Diseño responsive con TailwindCSS
+- **Guías detalladas**: Genera metodologías de estudio paso a paso para cada tema
+- **Preguntas de ejemplo**: Incluye preguntas con soluciones detalladas y variaciones
+- **Recursos multimedia**: Videos de YouTube integrados y enlaces educativos
+- **Análisis de errores**: Identifica errores comunes y casos atípicos
+- **Interfaz interactiva**: Pestañas organizadas con contenido expandible
 - **Drag & Drop**: Interfaz intuitiva para subir archivos
 
 ## 🛠️ Tecnologías
@@ -60,7 +62,11 @@ npm run dev
 
 1. **Sube tu examen**: Arrastra un archivo PDF o TXT o haz clic para seleccionarlo
 2. **Espera el análisis**: La IA procesará el contenido automáticamente
-3. **Revisa tu guía**: Obtén temas ordenados por prioridad con información detallada
+3. **Explora tu guía**: Navega por las pestañas de cada tema:
+   - **📋 Resumen**: Vista general y estadísticas del tema
+   - **📖 Guía**: Metodología de estudio, conceptos clave y errores comunes
+   - **❓ Preguntas**: Ejemplos con soluciones paso a paso y variaciones
+   - **🎯 Recursos**: Videos de YouTube integrados y enlaces educativos
 
 ## 📁 Estructura del proyecto
 

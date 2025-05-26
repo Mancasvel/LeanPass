@@ -64,28 +64,64 @@ export async function POST(request: NextRequest) {
         messages: [
           {
             role: 'user',
-            content: `You are an academic analysis expert. Analyze the following exam content and extract the main topics for a study guide.
+            content: `You are an academic analysis expert. Analyze the following exam content and create a comprehensive study guide with detailed resolution methods and resources.
 
 EXAM CONTENT:
 ${extractedText}
 
-Generate a JSON array with 8-12 topics from the exam. Each topic must have exactly these fields:
-- tema: topic name (string)
-- frecuencia: frequency 1-5 (number)
-- dificultad: difficulty 1-5 (number) 
-- tipo_preguntas: question types array (strings like "test", "desarrollo", "cálculo")
-- orden_estudio: study order 1-12 (number)
+Generate a JSON array with 8-12 topics from the exam. Each topic must have this EXACT structure:
 
-Return ONLY a valid JSON array with this exact structure:
-[
-  {"tema": "Topic Name", "frecuencia": 4, "dificultad": 3, "tipo_preguntas": ["test", "cálculo"], "orden_estudio": 1}
-]
+{
+  "tema": "Topic Name",
+  "frecuencia": 4,
+  "dificultad": 3,
+  "tipo_preguntas": ["test", "desarrollo", "cálculo"],
+  "orden_estudio": 1,
+  "guia_resolucion": {
+    "descripcion_general": "Brief description of the topic",
+    "metodologia_estudio": ["Step 1", "Step 2", "Step 3"],
+    "conceptos_clave": ["Key concept 1", "Key concept 2"],
+    "errores_comunes": ["Common mistake 1", "Common mistake 2"]
+  },
+  "preguntas_ejemplo": [
+    {
+      "pregunta": "Example question text",
+      "tipo": "desarrollo",
+      "dificultad": 3,
+      "solucion_paso_a_paso": ["Step 1", "Step 2", "Step 3"],
+      "variaciones": ["Variation 1", "Variation 2"],
+      "casos_atipicos": ["Edge case 1", "Edge case 2"]
+    }
+  ],
+  "recursos": [
+    {
+      "titulo": "Resource title",
+      "url": "https://example.com",
+      "tipo": "web",
+      "descripcion": "Resource description"
+    },
+    {
+      "titulo": "YouTube Video Title",
+      "url": "https://www.youtube.com/watch?v=VIDEO_ID",
+      "tipo": "youtube",
+      "descripcion": "Video description",
+      "youtube_id": "VIDEO_ID"
+    }
+  ]
+}
 
-Important: Return ONLY the JSON array, no explanations, no markdown, no additional text.`
+IMPORTANT REQUIREMENTS:
+1. Include 2-3 example questions per topic with detailed step-by-step solutions
+2. Provide real YouTube video IDs for educational content related to each topic
+3. Include relevant web resources (Wikipedia, educational sites, documentation)
+4. Make metodologia_estudio practical and actionable
+5. Focus on common exam question patterns and solution approaches
+
+Return ONLY a valid JSON array with this exact structure, no explanations, no markdown, no additional text.`
           }
         ],
         temperature: 0.3,
-        max_tokens: 16000,
+        max_tokens: 32000,
         top_p: 0.95,
       }),
     });
@@ -215,7 +251,10 @@ Important: Return ONLY the JSON array, no explanations, no markdown, no addition
           typeof topic.frecuencia === 'number' && 
           typeof topic.dificultad === 'number' &&
           Array.isArray(topic.tipo_preguntas) &&
-          typeof topic.orden_estudio === 'number';
+          typeof topic.orden_estudio === 'number' &&
+          topic.guia_resolucion &&
+          Array.isArray(topic.preguntas_ejemplo) &&
+          Array.isArray(topic.recursos);
         
         if (!isValid) {
           console.log('Invalid topic filtered out:', topic);
