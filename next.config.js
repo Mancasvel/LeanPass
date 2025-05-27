@@ -11,6 +11,25 @@ const nextConfig = {
   experimental: {
     // Enable experimental features if needed
   },
+  webpack: (config, { isServer }) => {
+    // Configuración específica para pdf-parse
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push({
+        'canvas': 'canvas',
+      });
+    }
+    
+    // Resolver problemas con módulos nativos
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false,
+      crypto: false,
+    };
+    
+    return config;
+  },
 };
 
 module.exports = nextConfig; 

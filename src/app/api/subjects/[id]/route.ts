@@ -7,11 +7,13 @@ import { withAuth } from '@/middleware/auth';
 import mongoose from 'mongoose';
 
 // GET /api/subjects/[id] - Obtener asignatura específica
-export const GET = withAuth(async (request: NextRequest, user: any, { params }: { params: { id: string } }) => {
+export const GET = withAuth(async (request: NextRequest, user: any, { params }: { params: Promise<{ id: string }> }) => {
   try {
     await connectDB();
 
-    if (!mongoose.Types.ObjectId.isValid(params.id)) {
+    const { id } = await params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { success: false, error: 'Invalid subject ID' },
         { status: 400 }
@@ -19,7 +21,7 @@ export const GET = withAuth(async (request: NextRequest, user: any, { params }: 
     }
 
     const subject = await Subject.findOne({
-      _id: params.id,
+      _id: id,
       userId: user._id
     }).lean();
 
@@ -45,11 +47,13 @@ export const GET = withAuth(async (request: NextRequest, user: any, { params }: 
 });
 
 // PUT /api/subjects/[id] - Actualizar asignatura
-export const PUT = withAuth(async (request: NextRequest, user: any, { params }: { params: { id: string } }) => {
+export const PUT = withAuth(async (request: NextRequest, user: any, { params }: { params: Promise<{ id: string }> }) => {
   try {
     await connectDB();
 
-    if (!mongoose.Types.ObjectId.isValid(params.id)) {
+    const { id } = await params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { success: false, error: 'Invalid subject ID' },
         { status: 400 }
@@ -70,7 +74,7 @@ export const PUT = withAuth(async (request: NextRequest, user: any, { params }: 
     const existingSubject = await Subject.findOne({
       userId: user._id,
       name: name.trim(),
-      _id: { $ne: params.id }
+      _id: { $ne: id }
     });
 
     if (existingSubject) {
@@ -82,7 +86,7 @@ export const PUT = withAuth(async (request: NextRequest, user: any, { params }: 
 
     // Actualizar asignatura
     const subject = await Subject.findOneAndUpdate(
-      { _id: params.id, userId: user._id },
+      { _id: id, userId: user._id },
       {
         name: name.trim(),
         description: description?.trim() || ''
@@ -121,11 +125,13 @@ export const PUT = withAuth(async (request: NextRequest, user: any, { params }: 
 });
 
 // DELETE /api/subjects/[id] - Eliminar asignatura
-export const DELETE = withAuth(async (request: NextRequest, user: any, { params }: { params: { id: string } }) => {
+export const DELETE = withAuth(async (request: NextRequest, user: any, { params }: { params: Promise<{ id: string }> }) => {
   try {
     await connectDB();
 
-    if (!mongoose.Types.ObjectId.isValid(params.id)) {
+    const { id } = await params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { success: false, error: 'Invalid subject ID' },
         { status: 400 }
@@ -134,7 +140,7 @@ export const DELETE = withAuth(async (request: NextRequest, user: any, { params 
 
     // Verificar que la asignatura existe y pertenece al usuario
     const subject = await Subject.findOne({
-      _id: params.id,
+      _id: id,
       userId: user._id
     });
 
@@ -146,9 +152,9 @@ export const DELETE = withAuth(async (request: NextRequest, user: any, { params 
     }
 
     // Eliminar en cascada: guías de estudio, exámenes y la asignatura
-    await StudyGuide.deleteMany({ subjectId: params.id, userId: user._id });
-    await Exam.deleteMany({ subjectId: params.id, userId: user._id });
-    await Subject.findByIdAndDelete(params.id);
+    await StudyGuide.deleteMany({ subjectId: id, userId: user._id });
+    await Exam.deleteMany({ subjectId: id, userId: user._id });
+    await Subject.findByIdAndDelete(id);
 
     return NextResponse.json({
       success: true,

@@ -6,10 +6,70 @@ import StudyGuide from '@/models/StudyGuide';
 import { withAuth } from '@/middleware/auth';
 import mongoose from 'mongoose';
 
-// Importación dinámica de pdf-parse para evitar problemas de SSR
-const getPdfParse = async () => {
-  const pdfParse = await import('pdf-parse');
-  return pdfParse.default;
+// Función para extraer texto de PDF con manejo robusto de errores
+const extractTextFromPdf = async (buffer: Buffer): Promise<string> => {
+  try {
+    // Validar que el buffer no esté vacío
+    if (!buffer || buffer.length === 0) {
+      throw new Error('PDF buffer is empty');
+    }
+    
+    console.log(`Processing PDF buffer of size: ${buffer.length} bytes`);
+    
+    // Intentar importación dinámica con múltiples estrategias
+    let pdfParse: any;
+    try {
+      // Estrategia 1: Importar directamente el módulo de la librería para evitar el debug mode
+      const pdfModule = await import('pdf-parse/lib/pdf-parse.js');
+      pdfParse = pdfModule.default || pdfModule;
+      console.log('PDF-parse loaded successfully from lib');
+    } catch (importError) {
+      console.error('Failed to import pdf-parse from lib:', importError);
+      try {
+        // Estrategia 2: Importación estándar como fallback
+        const pdfModule = await import('pdf-parse');
+        pdfParse = pdfModule.default || pdfModule;
+        console.log('PDF-parse loaded successfully from main');
+      } catch (fallbackError) {
+        console.error('Failed to import pdf-parse:', fallbackError);
+        throw new Error('PDF processing library not available. Please try with a TXT file instead.');
+      }
+    }
+    
+    // Verificar que pdfParse es una función
+    if (typeof pdfParse !== 'function') {
+      console.error('pdf-parse is not a function:', typeof pdfParse);
+      throw new Error('PDF processing library malformed. Please try with a TXT file instead.');
+    }
+    
+    // Procesar el PDF con pdf-parse
+    const data = await pdfParse(buffer, {
+      max: 0, // Sin límite de páginas
+    });
+    
+    console.log(`Extracted text length: ${data.text.length} characters`);
+    console.log(`PDF info - Pages: ${data.numpages}, Version: ${data.version}`);
+    
+    if (!data.text || data.text.trim().length === 0) {
+      throw new Error('No text could be extracted from PDF. The file might be image-based or corrupted.');
+    }
+    
+    return data.text.trim();
+  } catch (error) {
+    console.error('Error extracting text from PDF:', error);
+    
+    // Proporcionar mensajes de error más específicos
+    if (error instanceof Error) {
+      if (error.message.includes('ENOENT') || error.message.includes('no such file')) {
+        throw new Error('PDF processing failed due to missing dependencies. Please try uploading a TXT file instead.');
+      }
+      if (error.message.includes('Invalid PDF')) {
+        throw new Error('The uploaded file appears to be corrupted or is not a valid PDF. Please try with a different file or use TXT format.');
+      }
+      throw new Error(`PDF processing failed: ${error.message}. Please try with a TXT file for better compatibility.`);
+    }
+    throw new Error('PDF processing failed due to unknown error. Please try with a TXT file instead.');
+  }
 };
 
 // POST /api/analyze - Analizar archivo o examen existente
@@ -112,12 +172,23 @@ export const POST = withAuth(async (request: NextRequest, user: any) => {
 
     // Extraer texto del archivo almacenado
     if (exam.fileType === 'pdf') {
-      // Decodificar el archivo base64 y extraer texto
-      const base64Data = exam.fileUrl.split(',')[1];
-      const buffer = Buffer.from(base64Data, 'base64');
-      const pdfParse = await getPdfParse();
-      const data = await pdfParse(buffer);
-      extractedText = data.text;
+      try {
+        // Decodificar el archivo base64 y extraer texto
+        const base64Data = exam.fileUrl.split(',')[1];
+        const buffer = Buffer.from(base64Data, 'base64');
+        extractedText = await extractTextFromPdf(buffer);
+      } catch (pdfError) {
+        console.error('Error processing PDF:', pdfError);
+        // Marcar el examen como error y retornar
+        await Exam.findByIdAndUpdate(examId, { 
+          analysisStatus: 'error',
+          errorMessage: 'Error al procesar el archivo PDF. Por favor, asegúrate de que el archivo no esté dañado o intenta con un archivo de texto.'
+        });
+        return NextResponse.json(
+          { success: false, error: 'Error al procesar el archivo PDF. Por favor, intenta con un archivo de texto o verifica que el PDF no esté dañado.' },
+          { status: 400 }
+        );
+      }
     } else if (exam.fileType === 'txt') {
       // Decodificar el archivo base64 de texto
       const base64Data = exam.fileUrl.split(',')[1];

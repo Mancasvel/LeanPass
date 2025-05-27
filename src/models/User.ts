@@ -42,8 +42,7 @@ const UserSchema = new Schema<IUser>({
   }
 });
 
-// Índices para optimizar consultas
-UserSchema.index({ email: 1 });
+// El índice de email ya se crea automáticamente por unique: true
 
 // Método para comparar contraseñas
 UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {

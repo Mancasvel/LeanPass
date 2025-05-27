@@ -6,11 +6,13 @@ import { withAuth } from '@/middleware/auth';
 import mongoose from 'mongoose';
 
 // GET /api/exams/[id] - Obtener examen específico
-export const GET = withAuth(async (request: NextRequest, user: any, { params }: { params: { id: string } }) => {
+export const GET = withAuth(async (request: NextRequest, user: any, { params }: { params: Promise<{ id: string }> }) => {
   try {
     await connectDB();
 
-    if (!mongoose.Types.ObjectId.isValid(params.id)) {
+    const { id } = await params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { success: false, error: 'Invalid exam ID' },
         { status: 400 }
@@ -18,7 +20,7 @@ export const GET = withAuth(async (request: NextRequest, user: any, { params }: 
     }
 
     const exam = await Exam.findOne({
-      _id: params.id,
+      _id: id,
       userId: user._id
     }).populate('subjectId', 'name description').lean();
 
@@ -44,11 +46,13 @@ export const GET = withAuth(async (request: NextRequest, user: any, { params }: 
 });
 
 // PUT /api/exams/[id] - Actualizar examen
-export const PUT = withAuth(async (request: NextRequest, user: any, { params }: { params: { id: string } }) => {
+export const PUT = withAuth(async (request: NextRequest, user: any, { params }: { params: Promise<{ id: string }> }) => {
   try {
     await connectDB();
 
-    if (!mongoose.Types.ObjectId.isValid(params.id)) {
+    const { id } = await params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { success: false, error: 'Invalid exam ID' },
         { status: 400 }
@@ -65,7 +69,7 @@ export const PUT = withAuth(async (request: NextRequest, user: any, { params }: 
     }
 
     const exam = await Exam.findOneAndUpdate(
-      { _id: params.id, userId: user._id },
+      { _id: id, userId: user._id },
       { title: title.trim() },
       { new: true, runValidators: true }
     ).populate('subjectId', 'name description');
@@ -101,11 +105,13 @@ export const PUT = withAuth(async (request: NextRequest, user: any, { params }: 
 });
 
 // DELETE /api/exams/[id] - Eliminar examen
-export const DELETE = withAuth(async (request: NextRequest, user: any, { params }: { params: { id: string } }) => {
+export const DELETE = withAuth(async (request: NextRequest, user: any, { params }: { params: Promise<{ id: string }> }) => {
   try {
     await connectDB();
 
-    if (!mongoose.Types.ObjectId.isValid(params.id)) {
+    const { id } = await params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { success: false, error: 'Invalid exam ID' },
         { status: 400 }
@@ -114,7 +120,7 @@ export const DELETE = withAuth(async (request: NextRequest, user: any, { params 
 
     // Verificar que el examen existe y pertenece al usuario
     const exam = await Exam.findOne({
-      _id: params.id,
+      _id: id,
       userId: user._id
     });
 
@@ -126,10 +132,10 @@ export const DELETE = withAuth(async (request: NextRequest, user: any, { params 
     }
 
     // Eliminar la guía de estudio asociada si existe
-    await StudyGuide.deleteOne({ examId: params.id, userId: user._id });
+    await StudyGuide.deleteOne({ examId: id, userId: user._id });
     
     // Eliminar el examen
-    await Exam.findByIdAndDelete(params.id);
+    await Exam.findByIdAndDelete(id);
 
     return NextResponse.json({
       success: true,
